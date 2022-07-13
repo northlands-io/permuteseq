@@ -19,7 +19,7 @@ An article on how to obfuscate primary keys in databases.
 ## Alternatives
 
 * https://github.com/ioleo/cryptomute \
-Antoher Format Preserving Encryption library supporting multiple ciphers (DES, AES and Camellia) but slower performance.
+Another Format Preserving Encryption library supporting multiple ciphers (DES, AES and Camellia) but slower performance.
 
 * https://github.com/vinkla/hashids \
 Generates YouTube-like ids from numbers. Can be limited to digit-alphabet, but returns strings like `"09284"` instead of safe integers.
