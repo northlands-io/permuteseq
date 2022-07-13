@@ -2,6 +2,8 @@ A small PHP library to obfuscate numbers. Use it when you don't want to expose y
 
 It is similar to [Optimus](https://github.com/jenssegers/optimus), but supports *truly* custom numeric ranges. A secret 64-bit key can be used to generate several different outputs from the same input range.
 
+The permutations are collision-free and fully deterministic. The random-looking effect is due to encryption, not to a PRNG. The same input with the same secret key and boundary range will always produce the same output.
+
 ## Disclaimer
 
 The library should not be considered cryptographically strong and used to sensitive data. *This is not a true encryption algorithm.*
