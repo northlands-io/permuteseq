@@ -6,7 +6,7 @@ The permutations are collision-free and fully deterministic. The random-looking 
 
 ## Disclaimer
 
-The library should not be considered cryptographically strong or used to sensitive data. *This is not a true encryption algorithm.*
+The library should not be considered cryptographically strong or used to sensitive data.
 
 ## Credits
 
