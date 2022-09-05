@@ -1,8 +1,37 @@
 A small PHP library to obfuscate numbers. Use it when you don't want to expose your database numeric ids to users.
 
-It is similar to [Optimus](https://github.com/jenssegers/optimus), but supports custom numeric ranges. A secret 64-bit key can be used to generate several different outputs from the same input range.
+The permutations are collision-free and fully deterministic. The random-looking effect is due to encryption, not to a PRNG. The same boundary range with the same secret key will always produce the same output.
 
-The permutations are collision-free and fully deterministic. The random-looking effect is due to encryption, not to a PRNG. The same input with the same secret key and boundary range will always produce the same output.
+[![Latest Version on Packagist](https://img.shields.io/packagist/v/northlands/laravel-obfuscation.svg?style=flat-square)](https://packagist.org/packages/northlands/permuteseq)
+[![GitHub Tests Action Status](https://img.shields.io/github/workflow/status/northlands/permuteseq/run-tests?label=tests)](https://github.com/northlands/permuteseq/actions?query=workflow%3Arun-tests+branch%3Amain)
+[![Total Downloads](https://img.shields.io/packagist/dt/northlands/permuteseq.svg?style=flat-square)](https://packagist.org/packages/northlands/permuteseq)
+
+## Installation
+
+You can install the package via composer:
+
+```bash
+composer require northlands/permuteseq
+```
+
+## Usage
+
+```php
+$permuteseq = new Permuteseq(123456789012345, 1000, 9999); // Range 1000-9999
+
+$encoded = $permuteseq->encode(1000); // 4070
+$decoded = $permuteseq->decode($encoded); // 1000
+```
+
+## Testing
+
+```bash
+composer test
+```
+
+## Changelog
+
+Please see [CHANGELOG](CHANGELOG.md) for more information on what has changed recently.
 
 ## Disclaimer
 
@@ -11,7 +40,7 @@ The library should not be considered cryptographically strong or used to sensiti
 ## Credits
 
 * https://github.com/dverite/permuteseq \
-The PostgreSQL extension by Daniel Vérité used as code porting.
+The PostgreSQL extension by Daniel Vérité.
 
 * https://czep.net/21/obfuscate.html \
 An article on how to obfuscate primary keys in databases.
@@ -29,4 +58,4 @@ Super-fast number obfuscation based on Knuth's integer hash. However, range can 
 
 ## License
 
-Permutation is licensed under [The MIT License (MIT)](LICENSE).
+The MIT License (MIT). Please see [License File](LICENSE.md) for more information.

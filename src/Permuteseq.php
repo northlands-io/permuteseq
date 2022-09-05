@@ -1,21 +1,21 @@
 <?php
 
-namespace App\Support;
+namespace Northlands\Permuteseq;
 
 use InvalidArgumentException;
 
 /**
  * @see https://github.com/dverite/permuteseq/blob/dcff6e91eaebe69e3ee9b77e3cf00d6f66edb425/permuteseq.c
  */
-class Permutation
+class Permuteseq
 {
-    protected $key;
+    protected int $key;
 
-    protected $min;
+    protected int $min;
 
-    protected $max;
+    protected int $max;
 
-    protected $rounds;
+    protected int $rounds;
 
     /**
      * @param int $key
@@ -23,8 +23,12 @@ class Permutation
      * @param int $max
      * @param int $rounds Number of rounds of the Feistel Network. Must be an odd integer greater or equal to 3.
      */
-    public function __construct(int $key, int $min = 0, int $max = PHP_INT_MAX, int $rounds = 7)
+    final public function __construct(int $key, int $min = 0, int $max = PHP_INT_MAX, int $rounds = 7)
     {
+        if ($key < 2_147_483_648) {
+            throw new InvalidArgumentException("Key must be 64-bit integer.");
+        }
+
         if (! $this->hasValidRange($min, $max)) {
             throw new InvalidArgumentException("Invalid range: The difference between minimum and maximum values should be at least 3.");
         }
@@ -88,7 +92,7 @@ class Permutation
          * help if the user-supplied key is weak, for instance with only a
          * few right-most bits set.
          */
-        $key = $this->hash($this->key & 0xffffffff) | $this->hash(($this->key >> 32) & 0xffffffff) << 32;
+        $key = $this->hash($this->key & 0xffffffff) | ($this->hash($this->key >> 32) & 0xffffffff) << 32;
 
         /**
          * Initialize the two half blocks.
@@ -113,7 +117,7 @@ class Permutation
                  * j=(NR-1-i), i.e. we iterate over sub-keys in the reverse order.
                  */
                 $ki = $key >> ($hsz * ($reverse ? $this->rounds - 1 - $i : $i) & 0x3f);
-                $ki += $reverse ? $this->rounds - 1 - $i : $i;
+                $ki += ($reverse ? $this->rounds - 1 - $i : $i);
 
                 $r2 = ($l1 ^ $this->hash($r1) ^ $this->hash($ki)) & $mask;
 
@@ -123,9 +127,10 @@ class Permutation
 
             $result = ($r1 << $hsz) | $l1;
 
+            // Swap one more time to prepare for the next cycle
             $l1 = $r2;
             $r1 = $l2;
-        } while ($result > $this->max - $this->min && $count++ < $max);
+        } while (($result < 0 || $result > $this->max - $this->min) && $count++ < $max);
 
         if ($count >= $max) {
             throw new \RuntimeException("Infinite cycle walking detected.");
@@ -165,14 +170,26 @@ class Permutation
         $a += $k;
 
         $c ^= $b; $c -= $this->rot($b, 14);
+        $c &= 0xffffffff;
+
         $a ^= $c; $a -= $this->rot($c, 11);
+        $a &= 0xffffffff;
+
         $b ^= $a; $b -= $this->rot($a, 25);
+        $b &= 0xffffffff;
+
         $c ^= $b; $c -= $this->rot($b, 16);
+        $c &= 0xffffffff;
+
         $a ^= $c; $a -= $this->rot($c, 4);
+        $a &= 0xffffffff;
+
         $b ^= $a; $b -= $this->rot($a, 14);
+        $b &= 0xffffffff;
+
         $c ^= $b; $c -= $this->rot($b, 24);
 
-        return (int) $c;
+        return (int) $c & 0xffffffff;
     }
 
     /**
