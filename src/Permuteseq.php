@@ -37,6 +37,13 @@ class Permuteseq
             throw new InvalidArgumentException("Must be an odd integer greater or equal to 3.");
         }
 
+        /**
+         * Scramble the key. This is not strictly necessary, but will
+         * help if the user-supplied key is weak, for instance with only a
+         * few right-most bits set.
+         */
+        $key = $this->hash($key & 0xffffffff) | ($this->hash($key >> 32) & 0xffffffff) << 32;
+
         $this->key = $key;
         $this->min = $min;
         $this->max = $max;
@@ -88,13 +95,6 @@ class Permuteseq
         $mask = (1 << $hsz) - 1;
 
         /**
-         * Scramble the key. This is not strictly necessary, but will
-         * help if the user-supplied key is weak, for instance with only a
-         * few right-most bits set.
-         */
-        $key = $this->hash($this->key & 0xffffffff) | ($this->hash($this->key >> 32) & 0xffffffff) << 32;
-
-        /**
          * Initialize the two half blocks.
          * Work with the offset into the interval rather than the actual value.
          * This allows to use the full 32-bit range.
@@ -116,7 +116,7 @@ class Permuteseq
                  * When decrypting, Ki corresponds to the Kj of encryption with
                  * j=(NR-1-i), i.e. we iterate over sub-keys in the reverse order.
                  */
-                $ki = $key >> ($hsz * ($reverse ? $this->rounds - 1 - $i : $i) & 0x3f);
+                $ki = $this->key >> ($hsz * ($reverse ? $this->rounds - 1 - $i : $i) & 0x3f);
                 $ki += ($reverse ? $this->rounds - 1 - $i : $i);
 
                 $r2 = ($l1 ^ $this->hash($r1) ^ $this->hash($ki)) & $mask;
