@@ -2,8 +2,8 @@ A small PHP library to obfuscate numbers. Use it when you don't want to expose y
 
 The permutations are collision-free and fully deterministic. The random-looking effect is due to encryption, not to a PRNG. The same boundary range with the same secret key will always produce the same output.
 
-[![Latest Version on Packagist](https://img.shields.io/packagist/v/northlands/laravel-obfuscation.svg?style=flat-square)](https://packagist.org/packages/northlands/permuteseq)
-[![GitHub Tests Action Status](https://img.shields.io/github/workflow/status/northlands/permuteseq/run-tests?label=tests)](https://github.com/northlands/permuteseq/actions?query=workflow%3Arun-tests+branch%3Amain)
+[![Latest Version on Packagist](https://img.shields.io/packagist/v/northlands/permuteseq.svg?style=flat-square)](https://packagist.org/packages/northlands/permuteseq)
+[![GitHub Tests Action Status](https://img.shields.io/github/workflow/status/northlands-io/permuteseq/run-tests?label=tests)](https://github.com/northlands-io/permuteseq/actions?query=workflow%3Arun-tests+branch%3Amain)
 [![Total Downloads](https://img.shields.io/packagist/dt/northlands/permuteseq.svg?style=flat-square)](https://packagist.org/packages/northlands/permuteseq)
 
 ## Installation
