@@ -6,7 +6,7 @@
         "obfuscation",
         "feistel"
     ],
-    "homepage": "https://github.com/northlands/permuteseq",
+    "homepage": "https://github.com/northlands-io/permuteseq",
     "license": "MIT",
     "authors": [
         {
