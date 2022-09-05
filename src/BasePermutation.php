@@ -4,10 +4,7 @@ namespace Northlands\Permuteseq;
 
 use InvalidArgumentException;
 
-/**
- * @see https://github.com/dverite/permuteseq/blob/dcff6e91eaebe69e3ee9b77e3cf00d6f66edb425/permuteseq.c
- */
-class Permuteseq
+abstract class BasePermutation implements PermutationInterface
 {
     protected int $key;
 
@@ -17,59 +14,12 @@ class Permuteseq
 
     protected int $rounds;
 
-    /**
-     * @param int $key
-     * @param int $min
-     * @param int $max
-     * @param int $rounds Number of rounds of the Feistel Network. Must be an odd integer greater or equal to 3.
-     */
-    final public function __construct(int $key, PermutationInterface $permutation)
+    /*public function __construct(int $key, int $rounds = 7)
     {
-        if ($key < 2_147_483_648) {
-            throw new InvalidArgumentException("Key must be 64-bit integer.");
-        }
-
-        // $permutation->withKey($key);
-
-        /*if (! $this->hasValidRange($min, $max)) {
-            throw new InvalidArgumentException("Invalid range: The difference between minimum and maximum values should be at least 3.");
-        }
-
-        if ($rounds < 3) {
-            throw new InvalidArgumentException("Must be an odd integer greater or equal to 3.");
-        }*/
-
         $this->key = $key;
-        $this->min = $min;
-        $this->max = $max;
         $this->rounds = $rounds;
-    }
+    }*/
 
-    public static function create(int $key, int $min = 0, int $max = PHP_INT_MAX, int $rounds = 7): static
-    {
-        return new static($key, $min, $max, $rounds);
-    }
-
-    public static function fixed(string $key, int $min, int $max, int $rounds = 7): static
-    {
-        return new static($key, new FixedPermutation($min, $max, $rounds));
-    }
-
-    public static function dynamic(string $key, int $minlength, int $maxlength = null, int $rounds = 7): static
-    {
-        // Permuteseq::dynamic(1234, 8)->encode(1)
-
-        return new static($key, new DynamicPermutation($minlength, $maxlength, $rounds));
-    }
-
-    /**
-     * The output is constrained to the boundaries of the range by
-     * using a cycle-walking cipher on top of a Feistel network.
-     *
-     * @param $value
-     * @param bool $reverse
-     * @return int
-     */
     public function permute($value, bool $reverse = false): int
     {
         if ($value < $this->min || $value > $this->max) {
@@ -154,25 +104,6 @@ class Permuteseq
         return $this->min + $result;
     }
 
-    public function encode($value): int
-    {
-        return $this->permute($value);
-    }
-
-    public function decode($value): int
-    {
-        return $this->permute($value, true);
-    }
-
-    protected function hasValidRange($min, $max): bool
-    {
-        if (($min > 0 && $max < PHP_INT_MIN + $min) || ($min < 0 && $max > PHP_INT_MAX + $min)) {
-            return true;
-        }
-
-        return $max - $min >= 4 - 1;
-    }
-
     /**
      * @see https://doxygen.postgresql.org/hashfn_8c.html#a0e8a5084b019b55453fa64ac0329e73e
      * @see https://doxygen.postgresql.org/hashfn_8c.html#ab4646d77540701d2eb2c877effbe5739
@@ -212,5 +143,14 @@ class Permuteseq
     protected function rot($x, $k): int
     {
         return ($x << $k) | ($x >> (32 - $k));
+    }
+
+    protected function hasValidRange($min, $max): bool
+    {
+        if (($min > 0 && $max < PHP_INT_MIN + $min) || ($min < 0 && $max > PHP_INT_MAX + $min)) {
+            return true;
+        }
+
+        return $max - $min >= 4 - 1;
     }
 }

@@ -19,6 +19,9 @@ composer require northlands/permuteseq
 ```php
 $permuteseq = new Permuteseq(123456789012345, 1000, 9999); // Range 1000-9999
 
+$permuteseq = Permuteseq::fixed(123456789012345, 1000, 9999);
+$permuteseq = Permuteseq::dynamic(123456789012345, 8);
+
 $encoded = $permuteseq->encode(1000); // 4070
 $decoded = $permuteseq->decode($encoded); // 1000
 ```
