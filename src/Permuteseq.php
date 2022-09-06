@@ -17,16 +17,23 @@ class Permuteseq
 
     protected int $rounds;
 
+    protected bool $dynamic;
+
     /**
      * @param int $key
      * @param int $min
      * @param int $max
      * @param int $rounds Number of rounds of the Feistel Network. Must be an odd integer greater or equal to 3.
+     * @param int $mode
      */
-    final public function __construct(int $key, int $min = 0, int $max = PHP_INT_MAX, int $rounds = 7)
+    final public function __construct(int $key, int $min = 0, int $max = PHP_INT_MAX, int $rounds = 7, bool $dynamic = false)
     {
         if ($key < 2_147_483_648) {
             throw new InvalidArgumentException("Key must be 64-bit integer.");
+        }
+
+        if ($dynamic) {
+            // TODO Only positive range
         }
 
         if (! $this->hasValidRange($min, $max)) {
@@ -41,6 +48,7 @@ class Permuteseq
         $this->min = $min;
         $this->max = $max;
         $this->rounds = $rounds;
+        $this->dynamic = $dynamic;
     }
 
     public static function create(int $key, int $min = 0, int $max = PHP_INT_MAX, int $rounds = 7): static
@@ -58,7 +66,26 @@ class Permuteseq
      */
     public function permute($value, bool $reverse = false): int
     {
-        if ($value < $this->min || $value > $this->max) {
+        $min = $this->min;
+        $max = $this->max;
+
+        if ($this->dynamic) {
+            $greatest = max($min, $value);
+
+            $length = $value > 9 ? floor(log10(1 + $value)) : 1;
+
+            $min = max($this->min, pow(10, $length));
+            $max = $min * 10 - 1;
+
+            // TODO $this->assertValidRange($min, $max);
+
+            // 400-999
+            // 1000-9999
+
+            // 5000-7000
+        }
+
+        if ($value < $min || $value > $max) {
             throw new InvalidArgumentException("Value out of range.");
         }
 
@@ -68,9 +95,9 @@ class Permuteseq
          * It's mainly to avoid an infinite loop in case the chain of
          * results has a cycle (which would imply a bug somewhere).
          */
-        $max = 1000000;
+        $limit = 1000000;
 
-        $interval = $this->max - $this->min + 1;
+        $interval = $max - $min + 1;
 
         $count = 0;
 
@@ -99,8 +126,8 @@ class Permuteseq
          * Work with the offset into the interval rather than the actual value.
          * This allows to use the full 32-bit range.
          */
-        $l1 = ($value - $this->min) >> $hsz;
-        $r1 = ($value - $this->min) & $mask;
+        $l1 = ($value - $min) >> $hsz;
+        $r1 = ($value - $min) & $mask;
 
         $l2 = $r2 = 0;
 
@@ -130,14 +157,14 @@ class Permuteseq
             // Swap one more time to prepare for the next cycle
             $l1 = $r2;
             $r1 = $l2;
-        } while (($result < 0 || $result > $this->max - $this->min) && $count++ < $max);
+        } while (($result < 0 || $result > $max - $min) && $count++ < $limit);
 
-        if ($count >= $max) {
+        if ($count >= $limit) {
             throw new \RuntimeException("Infinite cycle walking detected.");
         }
 
         // Convert the offset in the interval to an absolute value, possibly negative.
-        return $this->min + $result;
+        return $min + $result;
     }
 
     public function encode($value): int
