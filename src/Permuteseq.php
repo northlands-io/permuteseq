@@ -41,8 +41,11 @@ class Permuteseq
          * Scramble the key. This is not strictly necessary, but will
          * help if the user-supplied key is weak, for instance with only a
          * few right-most bits set.
+         *
+         * The dverite/permuteseq extension supports 0xFFFFFFFFFFFFFFFF.
+         * This project cannot be fully compatible without GMP or BCMath extensions.
          */
-        $key = $this->hash($key & 0xffffffff) | ($this->hash($key >> 32) & 0xffffffff) << 32;
+        $key = ($this->hash($key & 0xFFFFFFFF) | ($this->hash($key >> 32) & 0xFFFFFFFF) << 32) & 0x7FFFFFFFFFFFFFFF;
 
         $this->key = $key;
         $this->min = $min;
@@ -117,7 +120,10 @@ class Permuteseq
                  * j=(NR-1-i), i.e. we iterate over sub-keys in the reverse order.
                  */
                 $ki = $this->key >> ($hsz * ($reverse ? $this->rounds - 1 - $i : $i) & 0x3f);
+                $ki &= 0xFFFFFFFF;
+
                 $ki += ($reverse ? $this->rounds - 1 - $i : $i);
+                $ki &= 0xFFFFFFFF;
 
                 $r2 = ($l1 ^ $this->hash($r1) ^ $this->hash($ki)) & $mask;
 
@@ -170,26 +176,27 @@ class Permuteseq
         $a += $k;
 
         $c ^= $b; $c -= $this->rot($b, 14);
-        $c &= 0xffffffff;
+        $c &= 0xFFFFFFFF;
 
         $a ^= $c; $a -= $this->rot($c, 11);
-        $a &= 0xffffffff;
+        $a &= 0xFFFFFFFF;
 
         $b ^= $a; $b -= $this->rot($a, 25);
-        $b &= 0xffffffff;
+        $b &= 0xFFFFFFFF;
 
         $c ^= $b; $c -= $this->rot($b, 16);
-        $c &= 0xffffffff;
+        $c &= 0xFFFFFFFF;
 
         $a ^= $c; $a -= $this->rot($c, 4);
-        $a &= 0xffffffff;
+        $a &= 0xFFFFFFFF;
 
         $b ^= $a; $b -= $this->rot($a, 14);
-        $b &= 0xffffffff;
+        $b &= 0xFFFFFFFF;
 
         $c ^= $b; $c -= $this->rot($b, 24);
+        $c &= 0xFFFFFFFF;
 
-        return (int) $c & 0xffffffff;
+        return (int) $c;
     }
 
     /**
