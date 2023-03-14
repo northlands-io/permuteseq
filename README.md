@@ -19,7 +19,7 @@ composer require northlands/permuteseq
 ```php
 $permuteseq = new Permuteseq(123456789012345, 1000, 9999); // Range 1000-9999
 
-$encoded = $permuteseq->encode(1000); // 4070
+$encoded = $permuteseq->encode(1000); // 1446
 $decoded = $permuteseq->decode($encoded); // 1000
 ```
 
@@ -27,6 +27,21 @@ $decoded = $permuteseq->decode($encoded); // 1000
 
 ```bash
 composer test
+```
+
+In order to ensure compability with the Postgres extension, an integration test is included:
+
+```bash
+vendor/bin/pest --group=integration
+```
+
+The integration test requires a running Postgres database with the extension installed:
+
+```bash
+docker build -t postgres tests
+docker run --name postgres -p 5432:5432 -e POSTGRES_PASSWORD=local -d postgres
+
+psql> CREATE EXTENSION permuteseq;
 ```
 
 ## Changelog
